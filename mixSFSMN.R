@@ -27,6 +27,13 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
 			return(d) }
   n <- length(y)   ;     dif <- 1   ;     count <- 0 
   if (get.init == TRUE) {
+	if(g==1){
+		mu <- runif(1,summary(y)[2],summary(y)[5])
+		s <- runif(1,0,2)*sd(y)
+		la <- skewness(y)+runif(1,-1,1)
+		del <- runif(1,-1,1)
+		}
+		else {
                  init <- kmeans(y, g,  algorithm="Hartigan-Wong")
                  w <- init$size/n ; del <-la <- rep(0,g)
                  mu <- as.vector(init$centers)
@@ -34,7 +41,7 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
 			nu <- NULL
 			for( j in 1:g)
 			la[j] <- skewness(y[init$cluster==j])				
-			  }
+			  }}
    LL <- 1  ; al=la/s
   while ((dif > tol) && (count <= iter.max)) {
   z.hat  <- matrix(0,n,g)
@@ -69,7 +76,14 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
 			d <- d + w[j]*dSFt(y, mu[j], s[j], del[j], nu[j], la[j])
 			return(d) }
   n <- length(y)   ;     dif <- 1   ;     count <- 0 
-  if (get.init == TRUE) {
+  if (get.init == TRUE) {	
+		if(g==1){
+		mu <- runif(1,summary(y)[2],summary(y)[5])
+		s <- runif(1,0,2)*sd(y)
+		la <- skewness(y)+runif(1,-1,1)
+		del <- runif(1,-1,1)
+		nu <- runif(1,1,10)
+		} else{
                  init <- kmeans(y, g,  algorithm="Hartigan-Wong")
                  w <- init$size/n ; del <-la <- rep(0,g)
                  mu <- as.vector(init$centers)
@@ -77,7 +91,7 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
 			nu <- runif(g,1,10)
 			for( j in 1:g)
 			la[j] <- skewness(y[init$cluster==j])				
-			  }
+			  }}
    LL <- 1  ; al=la/s
   while ((dif > tol) && (count <= iter.max)) {
   z.hat  <- matrix(0,n,g)
@@ -119,6 +133,13 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
 			return(d) }
   n <- length(y)   ;     dif <- 1   ;     count <- 0 
   if (get.init == TRUE) {
+		if(g==1){
+		mu <- runif(1,summary(y)[2],summary(y)[5])
+		s <- runif(1,0,2)*sd(y)
+		la <- skewness(y)+runif(1,-1,1)
+		del <- runif(1,-1,1)
+		nu <- NULL
+		} else{
                  init <- kmeans(y, g,  algorithm="Hartigan-Wong")
                  w <- init$size/n ; del <-la <- rep(0,g)
                  mu <- as.vector(init$centers)
@@ -126,7 +147,7 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
 			for( j in 1:g)
 			la[j] <- skewness(y[init$cluster==j])
 			nu <- NULL
-			  }
+			  }}
    LL <- 1 ;al<-la/s
   while ((dif > tol) && (count <= iter.max)) {
   z.hat  <- matrix(0,n,g)
@@ -167,6 +188,13 @@ mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.
 			return(d) }
   n <- length(y)   ;     dif <- 1   ;     count <- 0 
   if (get.init == TRUE) {
+		if(g==1){
+		mu <- runif(1,summary(y)[2],summary(y)[5])
+		s <- runif(1,0,2)*sd(y)
+		la <- skewness(y)+runif(1,-1,1)
+		del <- runif(1,-1,1)
+		nu <- runif(1,1,10)
+		} else{
                  init <- kmeans(y, g,  algorithm="Hartigan-Wong")
                  w <- init$size/n ; del <-la <- rep(0,g)
                  mu <- as.vector(init$centers)
@@ -174,7 +202,7 @@ mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.
 			nu <- runif(g,1,10)
 			for( j in 1:g)
 			la[j] <- skewness(y[init$cluster==j])	
-			  }
+			  }}
    LL <- 1; al <- la/s
   while ((dif > tol) && (count <= iter.max)) {
   z.hat  <- matrix(0,n,g)
@@ -218,6 +246,13 @@ if(family=="SFEP"){
 			return(d) }
   n <- length(y)   ;     dif <- 1   ;     count <- 0 
   if (get.init == TRUE) {
+		if(g==1){
+		mu <- runif(1,summary(y)[2],summary(y)[5])
+		s <- runif(1,0,2)*sd(y)
+		la <- skewness(y)+runif(1,-1,1)
+		del <- runif(1,-1,1)
+		nu <- runif(1,0,1)
+		} else{
                  init <- kmeans(y, g,  algorithm="Hartigan-Wong")
                  w <- init$size/n ; del <-la <- rep(0,g)
                  mu <- as.vector(init$centers)
@@ -225,7 +260,7 @@ if(family=="SFEP"){
 			nu <- runif(g,0,1)
 			for( j in 1:g)
 			la[j] <- skewness(y[init$cluster==j])
-			  }
+			  }}
    LL <- 1 ; al <- la/s
   while ((dif > tol) && (count <= iter.max)) {
   z.hat  <- matrix(0,n,g)
@@ -267,14 +302,21 @@ if(family=="SFEP"){
 			return(d) }
   n <- length(y)   ;     dif <- 1   ;     count <- 0 
   if (get.init == TRUE) {
+		if(g==1){
+		mu <- runif(1,summary(y)[2],summary(y)[5])
+		s <- runif(1,0,2)*sd(y)
+		la <- skewness(y)+runif(1,-1,1)
+		del <- runif(1,-1,1)
+		nu1 <- runif(1,0,1);nu2 <- runif(1,0,1)
+		} else{
                  init <- kmeans(y, g,  algorithm="Hartigan-Wong")
                  w <- init$size/n ; del <-la <- rep(0,g)
                  mu <- as.vector(init$centers)
                  s <- sqrt(init$withinss/init$size) 
-			nu1 <- runif(g,.1,.9);nu2 <- runif(g,.1,.9)
+			nu1 <- runif(g,0,1);nu2 <- runif(g,0,1)
 			for( j in 1:g)
 			la[j] <- skewness(y[init$cluster==j])
-			  }
+			  }}
 	else{
 		nu1 <- nu[[1]] ; nu2 <- nu[[2]] }
    LL <- 1 ; al <- la/s
@@ -334,6 +376,4 @@ if(family=="SFEP"){
   obj.out <- obj.out[names(obj.out)!="group"]
   obj.out
   }
-
-
 
