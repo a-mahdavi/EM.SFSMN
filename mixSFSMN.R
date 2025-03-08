@@ -53,18 +53,19 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
   # MCE steps
   w[j] <- sum(z.hat[,j])/n
 	mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.hat[,j]*gamh2)+al[j]^2*s[j]^2*sum(z.hat[,j]*y))/sum(z.hat[,j]*(gamh1+s[j]^2*al[j]^2))
-	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j])) ; b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)
+	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j]))+la[j]*sum(z.hat[,j]*gamh2*(y-mu[j]))
+	b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)+la[j]^2*sum(z.hat[,j]*(y-mu[j])^2)
 	s1 <- (-a+sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j])) ; s2 <- (-a-sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j]))
 		if ( s1 >0) 
 		s[j] <- s1 else 
 		s[j] <- s2
 	 del[j] <- (sum(z.hat[,j]*gamh1*abs(y-mu[j])/s[j])-sum(z.hat[,j])*dnorm(del[j])/pnorm(del[j]))/sum(z.hat[,j]*gamh1)
-	 la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j]))/sum(z.hat[,j]*(y-mu[j])^2)*s[j]
+	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j])/s[j])/sum(z.hat[,j]*((y-mu[j])/s[j])^2)
 	}
   LL.new <- sum(log(dmixSFN(y,w,mu,s,del,la))) # log-likelihood function
   count <- count +1 
   dif <- abs(LL.new/LL-1)
-	LL <- LL.new
+	LL <- LL.new; al=la/s
 	cat('iter =', count, '\tloglike =', LL.new, '\n')
   } }
 	if(family=="SFT"){
@@ -103,13 +104,14 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
   # MCE steps
   w[j] <- sum(z.hat[,j])/n
 	mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.hat[,j]*gamh2)+al[j]^2*s[j]^2*sum(z.hat[,j]*y))/sum(z.hat[,j]*(gamh1+s[j]^2*al[j]^2))
-	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j])) ; b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)
+	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j]))+la[j]*sum(z.hat[,j]*gamh2*(y-mu[j]))
+	b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)+la[j]^2*sum(z.hat[,j]*(y-mu[j])^2)
 	s1 <- (-a+sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j])) ; s2 <- (-a-sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j]))
 		if ( s1 >0) 
 		s[j] <- s1 else 
 		s[j] <- s2
 	del[j] <- (sum(z.hat[,j]*gamh1*abs(y-mu[j])/s[j])-sum(z.hat[,j])*dt(del[j],nu[j])/pt(del[j],nu[j]))/sum(z.hat[,j]*gamh1)
-	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j]))/sum(z.hat[,j]*(y-mu[j])^2)*s[j]
+	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j])/s[j])/sum(z.hat[,j]*((y-mu[j])/s[j])^2)
 	nu[j] <- optim(nu[j],function(x){
 			nu[j] <- x
 		-sum(log(dmixSFt(y,w,mu,s,del,nu,la)))
@@ -118,7 +120,7 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
   LL.new <- sum(log(dmixSFt(y,w,mu,s,del,nu,la))) # log-likelihood function
   count <- count +1 
   dif <- abs(LL.new/LL-1)
-	LL <- LL.new
+	LL <- LL.new ;	al=la/s
 	cat('iter =', count, '\tloglike =', LL.new, '\n')
   } }
 	if(family=="SFL"){
@@ -160,18 +162,19 @@ mix.SFSMN <- function(y, g=1, w=1, mu, s, del, nu=1, la, family="SFT", iter.max=
   # MCE steps
   w[j] <- sum(z.hat[,j])/n
 mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.hat[,j]*gamh2)+al[j]^2*s[j]^2*sum(z.hat[,j]*y))/sum(z.hat[,j]*(gamh1+s[j]^2*al[j]^2))
-	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j])) ; b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)
-	s1 <- (-a+sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j])) ; s2 <- (-a-sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j]))
+	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j]))+la[j]*sum(z.hat[,j]*gamh2*(y-mu[j]))
+	b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)+la[j]^2*sum(z.hat[,j]*(y-mu[j])^2)	
+     s1 <- (-a+sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j])) ; s2 <- (-a-sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j]))
 		if ( s1 >0) 
 		s[j] <- s1 else 
 		s[j] <- s2
 	 del[j] <- (sum(z.hat[,j]*gamh1*abs(y-mu[j])/s[j])-sum(z.hat[,j])*dL(del[j])/integrate(dL,-Inf,del[j],stop.on.error=F)$value)/sum(z.hat[,j]*gamh1)
-	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j]))/sum(z.hat[,j]*(y-mu[j])^2)*s[j]
+	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j])/s[j])/sum(z.hat[,j]*((y-mu[j])/s[j])^2)
 		}
   LL.new <- sum(log(dmixSFL(y,w,mu,s,del,la))) # log-likelihood function
   count <- count +1 
   dif <- abs(LL.new/LL-1)
-	LL <- LL.new
+	LL <- LL.new; al=la/s
 	cat('iter =', count, '\tloglike =', LL.new, '\n')
   } }
 	if(family=="SFSL"){
@@ -216,13 +219,14 @@ mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.
   # MCE steps
   	w[j] <- sum(z.hat[,j])/n
 	mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.hat[,j]*gamh2)+al[j]^2*s[j]^2*sum(z.hat[,j]*y))/sum(z.hat[,j]*(gamh1+s[j]^2*al[j]^2))
-	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j])) ; b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)
+	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j]))+la[j]*sum(z.hat[,j]*gamh2*(y-mu[j]))
+	b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)+la[j]^2*sum(z.hat[,j]*(y-mu[j])^2)
 	s1 <- (-a+sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j])) ; s2 <- (-a-sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j]))
 		if ( s1 >0) 
 		s[j] <- s1 else 
 		s[j] <- s2
 	del[j] <- (sum(z.hat[,j]*gamh1*abs(y-mu[j])/s[j])-sum(z.hat[,j])*dSL(del[j],nu[j])/integrate(dSL,-Inf,del[j],nu=nu[j],stop.on.error=F)$value)/sum(z.hat[,j]*gamh1)
-	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j]))/sum(z.hat[,j]*(y-mu[j])^2)*s[j]
+	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j])/s[j])/sum(z.hat[,j]*((y-mu[j])/s[j])^2)
 	nu[j] <- optim(nu[j],function(x){
 			nu[j] <- x
 		-sum(log(dmixSFSL(y,w,mu,s,del,nu,la)))
@@ -231,7 +235,7 @@ mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.
   LL.new <- sum(log(dmixSFSL(y,w,mu,s,del, nu, la))) # log-likelihood function
   count <- count +1 
   dif <- abs(LL.new/LL-1)
-	LL <- LL.new
+	LL <- LL.new; al=la/s
 	cat('iter =', count, '\tloglike =', LL.new, '\n')
   } }
 if(family=="SFEP"){
@@ -272,13 +276,14 @@ if(family=="SFEP"){
   # MCE steps
  	w[j] <- sum(z.hat[,j])/n
 	mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.hat[,j]*gamh2)+al[j]^2*s[j]^2*sum(z.hat[,j]*y))/sum(z.hat[,j]*(gamh1+s[j]^2*al[j]^2))
-	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j])) ; b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)
+	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j]))+la[j]*sum(z.hat[,j]*gamh2*(y-mu[j]))
+	b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)+la[j]^2*sum(z.hat[,j]*(y-mu[j])^2)
 	s1 <- (-a+sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j])) ; s2 <- (-a-sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j]))
 		if ( s1 >0) 
 		s[j] <- s1 else 
 		s[j] <- s2
 	del[j] <- (sum(z.hat[,j]*gamh1*abs(y-mu[j])/s[j])-sum(z.hat[,j])*dEP(del[j],nu[j])/integrate(dEP,-Inf,del[j],nu=nu[j],stop.on.error=F)$value)/sum(z.hat[,j]*gamh1)
-	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j]))/sum(z.hat[,j]*(y-mu[j])^2)*s[j]
+	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j])/s[j])/sum(z.hat[,j]*((y-mu[j])/s[j])^2)
 	nu[j] <- optim(nu[j],function(x){
 			 nu[j] <- x
 		-sum(log(dmixSFEP(y,w,mu,s,del,nu, la)))
@@ -287,7 +292,7 @@ if(family=="SFEP"){
   LL.new <- sum(log(dmixSFEP(y,w,mu,s,del,nu, la))) # log-likelihood function
   count <- count +1 
   dif <- abs(LL.new/LL-1)
-	LL <- LL.new
+	LL <- LL.new; al=la/s
 	cat('iter =', count, '\tloglike =', LL.new, '\n')
   } }
 	if(family=="SFCN"){
@@ -331,13 +336,14 @@ if(family=="SFEP"){
   # MCE steps
   w[j] <- sum(z.hat[,j])/n
 	mu[j] <- (sum(z.hat[,j]*gamh1*(y-s[j]*del[j]*sign(y-mu[j])))-al[j]*s[j]^2*sum(z.hat[,j]*gamh2)+al[j]^2*s[j]^2*sum(z.hat[,j]*y))/sum(z.hat[,j]*(gamh1+s[j]^2*al[j]^2))
-	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j])) ; b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)
+	a <- del[j]*sum(z.hat[,j]*gamh1*abs(y-mu[j]))+la[j]*sum(z.hat[,j]*gamh2*(y-mu[j]))
+	b <- sum(z.hat[,j]*gamh1*(y-mu[j])^2)+la[j]^2*sum(z.hat[,j]*(y-mu[j])^2)
 	s1 <- (-a+sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j])) ; s2 <- (-a-sqrt(a^2+4*sum(z.hat[,j])*b))/(2*sum(z.hat[,j]))
 		if ( s1 >0) 
 		s[j] <- s1 else 
 		s[j] <- s2
 	del[j] <- (sum(z.hat[,j]*gamh1*abs(y-mu[j])/s[j])-sum(z.hat[,j])*dCN(del[j],nu1[j],nu2[j])/integrate(dCN,-Inf,del[j],nu1=nu1[j],nu2=nu2[j],stop.on.error=F)$value)/sum(z.hat[,j]*gamh1)
-	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j]))/sum(z.hat[,j]*(y-mu[j])^2)*s[j]
+	la [j] <- sum(z.hat[,j]*gamh2*(y-mu[j])/s[j])/sum(z.hat[,j]*((y-mu[j])/s[j])^2)
 	nu1 <- optim(nu1,function(x){
 		-sum(log(dmixSFCN(y,w,mu,s,del,x,nu2, la)))
 		},method="L-BFGS-B",lower=0.01,upper=.99)$par
@@ -348,7 +354,7 @@ if(family=="SFEP"){
   LL.new <- sum(log(dmixSFCN(y,w,mu,s,del, nu1 ,nu2, la))) # log-likelihood function
   count <- count +1 
   dif <- abs(LL.new/LL-1)
-	LL <- LL.new
+	LL <- LL.new; al=la/s
 	cat('iter =', count, '\tloglike =', LL.new, '\n')
   }
 	nu <- list(nu1,nu2)
@@ -376,4 +382,7 @@ if(family=="SFEP"){
   obj.out <- obj.out[names(obj.out)!="group"]
   obj.out
   }
+
+
+
 
